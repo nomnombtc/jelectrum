@@ -399,9 +399,24 @@ public class StratumConnection
                 {
                     first_address=address;
                 }
+                
+                // sane defaults, same like spesmilo
+                int session_max_subscriptions = 10000;
+                if (jelectrum.getConfig().isSet("session_max_subscriptions"))
+                {
+                    session_max_subscriptions = jelectrum.getConfig().getInt("session_max_subscriptions");
+                }
 
-                logRequest(method, input_size, 0);
-                jelectrum.getElectrumNotifier().registerBlockchainAddress(this, id, true, address);
+                if (subscription_count.get() > session_max_subscriptions)
+                {
+                    jelectrum.getEventLog().alarm(connection_id + " - session_max_subscriptions(" + subscription_count.get() + "/" + session_max_subscriptions + ") reached, closing socket.");
+                    // wait a few seconds and disconnect client
+                    Thread.sleep(30000);
+                    close();
+                } else {
+                    logRequest(method, input_size, 0);
+                    jelectrum.getElectrumNotifier().registerBlockchainAddress(this, id, true, address);
+                }
 
             }
 
