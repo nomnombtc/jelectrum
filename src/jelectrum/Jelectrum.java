@@ -195,7 +195,7 @@ public class Jelectrum
         {
             peer_group.addPeerDiscovery(new DnsDiscovery(network_params));
         }
-        peer_group.addDataEventListener(new ImportEventListener(importer));
+        peer_group.addBlocksDownloadedEventListener(new ImportEventListener(importer));
         peer_group.addOnTransactionBroadcastListener(new ImportEventListener(importer));
         peer_group.setMinBroadcastConnections(1);
 
