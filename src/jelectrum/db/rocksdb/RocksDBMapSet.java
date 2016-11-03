@@ -86,7 +86,7 @@ public class RocksDBMapSet extends DBMapSetThreaded
     }
     finally
     {
-      it.dispose();
+      it.close();
     } 
     /*catch(RocksDBException e)
     { 
