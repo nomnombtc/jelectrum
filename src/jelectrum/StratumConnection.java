@@ -48,7 +48,7 @@ public class StratumConnection
     private String first_address;
     private AtomicInteger subscription_count = new AtomicInteger(0);
     private RateLimit session_rate_limit;
-
+    private int session_max_subscriptions = 10000;
    
 
     private LinkedBlockingQueue<JSONObject> out_queue = new LinkedBlockingQueue<JSONObject>();
@@ -100,7 +100,10 @@ public class StratumConnection
         {
           session_rate_limit = new RateLimit(jelectrum.getConfig().getDouble("session_rate_limit"), 2.0);
         }
-    
+        if (jelectrum.getConfig().isSet("session_max_subscriptions"))
+        {
+          session_max_subscriptions = jelectrum.getConfig().getInt("session_max_subscriptions");
+        }
         new OutThread().start();
         new InThread().start();
 
@@ -400,18 +403,11 @@ public class StratumConnection
                     first_address=address;
                 }
                 
-                // sane defaults, same like spesmilo
-                int session_max_subscriptions = 10000;
-                if (jelectrum.getConfig().isSet("session_max_subscriptions"))
-                {
-                    session_max_subscriptions = jelectrum.getConfig().getInt("session_max_subscriptions");
-                }
-
                 if (subscription_count.get() > session_max_subscriptions)
                 {
-                    jelectrum.getEventLog().alarm(connection_id + " - session_max_subscriptions(" + subscription_count.get() + "/" + session_max_subscriptions + ") reached, closing socket.");
+                    jelectrum.getEventLog().alarm(connection_id + " - session_max_subscriptions(" + session_max_subscriptions + ") reached, closing socket.");
                     // wait a few seconds and disconnect client
-                    Thread.sleep(30000);
+                    Thread.sleep(15000);
                     close();
                 } else {
                     logRequest(method, input_size, 0);
